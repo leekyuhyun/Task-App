@@ -1,6 +1,6 @@
 import { loggerReducer } from '../slices/loggerSlice';
-import { boardsReducer } from '../slices/boardsSlice';
 import { modalReducer } from '../slices/modalSlice';
+import { boardsReducer } from '../slices/boardsSlice';
 
 const reducer = {
   logger: loggerReducer,

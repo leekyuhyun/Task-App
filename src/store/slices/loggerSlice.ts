@@ -1,18 +1,23 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ILogItem } from '../../types';
 
-type LoggerState = {
+type TloggerState = {
   logArray: ILogItem[];
 };
 
-const initialState: LoggerState = {
+const initialState: TloggerState = {
   logArray: [],
 };
 
 const loggerSlice = createSlice({
   name: 'logger',
   initialState,
-  reducers: {},
+  reducers: {
+    addLog: (state, { payload }: PayloadAction<ILogItem>) => {
+      state.logArray.push(payload);
+    },
+  },
 });
 
 export const loggerReducer = loggerSlice.reducer;
+export const { addLog } = loggerSlice.actions;
