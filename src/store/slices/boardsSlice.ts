@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { IBoard, IList, ITask } from '../..//types';
+import type { IBoard, IList, ITask } from '../../types';
 
 type TBoardsState = {
   modalActive: boolean;
@@ -34,6 +34,15 @@ type TDeleteTaskAction = {
   boardId: string;
   listId: string;
   taskId: string;
+};
+
+type TSortAction = {
+  boardIndex: number;
+  droppableIdStart: string;
+  droppableIdEnd: string;
+  droppableIndexStart: number;
+  droppableIndexEnd: number;
+  draggableId: string;
 };
 
 const initialState: TBoardsState = {
@@ -73,72 +82,63 @@ const boardsSlice = createSlice({
     },
 
     addList: (state, { payload }: PayloadAction<TAddListAction>) => {
-      state.boardArray.map((board) =>
-        board.boardId === payload.boardId
-          ? { ...board, lists: board.lists.push(payload.list) }
-          : board,
-      );
+      const board = state.boardArray.find((b) => b.boardId === payload.boardId);
+      if (board) board.lists.push(payload.list);
     },
 
     addTask: (state, { payload }: PayloadAction<TAddTaskAction>) => {
-      state.boardArray.map((board) =>
-        board.boardId === payload.boardId
-          ? {
-              ...board,
-              lists: board.lists.map((list) =>
-                list.listId === payload.listId
-                  ? { ...list, tasks: list.tasks.push(payload.task) }
-                  : list,
-              ),
-            }
-          : board,
-      );
+      const board = state.boardArray.find((b) => b.boardId === payload.boardId);
+      const list = board?.lists.find((l) => l.listId === payload.listId);
+      if (list) list.tasks.push(payload.task);
     },
 
     updateTask: (state, { payload }: PayloadAction<TAddTaskAction>) => {
-      state.boardArray = state.boardArray.map((board) =>
-        board.boardId === payload.boardId
-          ? {
-              ...board,
-              lists: board.lists.map((list) =>
-                list.listId === payload.listId
-                  ? {
-                      ...list,
-                      tasks: list.tasks.map((task) =>
-                        task.taskId === payload.task.taskId ? payload.task : task,
-                      ),
-                    }
-                  : list,
-              ),
-            }
-          : board,
-      );
+      const board = state.boardArray.find((b) => b.boardId === payload.boardId);
+      const list = board?.lists.find((l) => l.listId === payload.listId);
+      if (list) {
+        const taskIndex = list.tasks.findIndex((t) => t.taskId === payload.task.taskId);
+        if (taskIndex !== -1) list.tasks[taskIndex] = payload.task;
+      }
     },
 
     deleteTask: (state, { payload }: PayloadAction<TDeleteTaskAction>) => {
-      state.boardArray = state.boardArray.map((board) =>
-        board.boardId === payload.boardId
-          ? {
-              ...board,
-              lists: board.lists.map((list) =>
-                list.listId === payload.listId
-                  ? { ...list, tasks: list.tasks.filter((task) => task.taskId !== payload.taskId) }
-                  : list,
-              ),
-            }
-          : board,
-      );
+      const board = state.boardArray.find((b) => b.boardId === payload.boardId);
+      const list = board?.lists.find((l) => l.listId === payload.listId);
+      if (list) {
+        list.tasks = list.tasks.filter((t) => t.taskId !== payload.taskId);
+      }
     },
 
     deleteList: (state, { payload }: PayloadAction<TDeleteListAction>) => {
-      state.boardArray = state.boardArray.map((board) =>
-        board.boardId === payload.boardId
-          ? { ...board, lists: board.lists.filter((list) => list.listId !== payload.listId) }
-          : board,
-      );
+      const board = state.boardArray.find((b) => b.boardId === payload.boardId);
+      if (board) {
+        board.lists = board.lists.filter((l) => l.listId !== payload.listId);
+      }
     },
+
     setModalActive: (state, { payload }: PayloadAction<boolean>) => {
       state.modalActive = payload;
+    },
+
+    sort: (state, { payload }: PayloadAction<TSortAction>) => {
+      if (payload.droppableIdStart === payload.droppableIdEnd) {
+        const list = state.boardArray[payload.boardIndex].lists.find(
+          (list) => list.listId === payload.droppableIdStart,
+        );
+        const card = list?.tasks.splice(payload.droppableIndexStart, 1);
+        list?.tasks.splice(payload.droppableIndexEnd, 0, ...card!);
+      } else {
+        if (payload.droppableIdStart && payload.droppableIdEnd) {
+          const listStart = state.boardArray[payload.boardIndex].lists.find(
+            (list) => list.listId === payload.droppableIdStart,
+          );
+          const card = listStart?.tasks.splice(payload.droppableIndexStart, 1);
+          const listEnd = state.boardArray[payload.boardIndex].lists.find(
+            (list) => list.listId === payload.droppableIdEnd,
+          );
+          listEnd?.tasks.splice(payload.droppableIndexEnd, 0, ...card!);
+        }
+      }
     },
   },
 });
@@ -153,4 +153,5 @@ export const {
   deleteTask,
   deleteList,
   setModalActive,
+  sort,
 } = boardsSlice.actions;
