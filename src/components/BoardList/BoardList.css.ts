@@ -63,3 +63,35 @@ export const smallTitle = style({
   color: vars.color.brightText,
   fontSize: vars.fontSizing.T3,
 });
+
+export const authSection = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '1rem',
+  marginLeft: '2rem', // 플러스 버튼과 간격 확보
+});
+
+export const greeting = style({
+  color: vars.color.brightText,
+  fontSize: vars.fontSizing.T3,
+  fontWeight: 'bold',
+});
+
+export const authButton = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.5rem 1rem',
+  borderRadius: '8px',
+  border: 'none',
+  backgroundColor: vars.color.mainFaded,
+  color: vars.color.brightText,
+  fontSize: vars.fontSizing.T3,
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  ':hover': {
+    opacity: 0.8,
+    transform: 'scale(1.03)',
+  },
+});
